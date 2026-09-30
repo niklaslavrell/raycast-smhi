@@ -19,7 +19,7 @@ interface NominatimRow {
 }
 
 const NOMINATIM_HOST = "https://nominatim.openstreetmap.org";
-const USER_AGENT = "raycast-smhi-extension/0.1 (https://github.com/niklaslavrell/smhi)";
+const USER_AGENT = "raycast-smhi-extension/0.1 (https://github.com/niklaslavrell/raycast-smhi)";
 // SMHI's grid stops at the Nordics, so anything outside it would only ever resolve to an
 // out-of-coverage notice. Without this, "Stockholm" returns three US villages.
 const COUNTRY_CODES = "se,no,fi,dk";
