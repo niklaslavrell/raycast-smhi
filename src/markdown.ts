@@ -10,7 +10,7 @@ import {
 import { symbolFor } from "./symbols";
 import { levelPresentation, type ResolvedWarning } from "./warnings";
 
-// Coming days keep an interval table instead of metadata rows — five columns of hour-by-hour
+// Coming days keep an interval table instead of metadata rows, because five columns of hour-by-hour
 // values is the one shape Detail.Metadata can't express.
 export function dayMarkdown(summary: DailySummary): string {
   const symbol = symbolFor(summary.symbolCode);

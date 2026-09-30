@@ -20,7 +20,7 @@ interface WarningDescription {
 
 // SMHI's `area` field can be either a single Feature or a FeatureCollection.
 // Geometries seen in the wild: Polygon, MultiPolygon, LineString (e.g. river warnings).
-// Only polygon shapes are testable with point-in-polygon — others are skipped.
+// Only polygon shapes are testable with point-in-polygon; others are skipped.
 type WarningGeometry =
   | { type: "Polygon"; coordinates: number[][][] }
   | { type: "MultiPolygon"; coordinates: number[][][][] }
@@ -110,7 +110,7 @@ function pointInGeometry(lon: number, lat: number, geom: WarningGeometry | undef
     }
     return false;
   }
-  // LineString / Point / other geometries can't be tested with point-in-polygon — skip.
+  // LineString / Point / other geometries can't be tested with point-in-polygon, so skip them.
   return false;
 }
 

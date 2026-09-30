@@ -24,7 +24,7 @@ function roundedWithoutNegativeZero(n: number, decimals: number): number {
   return Math.round(n * factor) / factor + 0;
 }
 
-// Whole numbers with no thousands separator — sv-SE would group 1034 hPa as "1 034 hPa".
+// Whole numbers with no thousands separator: sv-SE would group 1034 hPa as "1 034 hPa".
 export function formatInteger(n: number): string {
   return n.toLocaleString(NUMBER_LOCALE, { maximumFractionDigits: 0, useGrouping: false });
 }
@@ -36,7 +36,7 @@ export function formatTemp(c: number): string {
 }
 
 // Full-precision temperature with unit, for the detail pane. Uses the same comma decimal as every
-// other number in the extension — `toFixed` would render a dot and break the convention.
+// other number in the extension, since `toFixed` would render a dot and break the convention.
 export function formatTempExact(c: number): string {
   return `${formatDecimal(c)} °C`;
 }
@@ -79,7 +79,7 @@ export function formatPrecip(mm: number, probability: number): string {
   return `${formatDecimal(mm)} mm · ${Math.round(probability)}%`;
 }
 
-// Australian BoM Apparent Temperature — works year-round (cold wind-chill and hot-humid).
+// Australian BoM Apparent Temperature, which works year-round (cold wind-chill and hot-humid).
 // Inputs: air temp °C, wind speed m/s at 10 m, relative humidity %. Output: °C.
 // https://www.bom.gov.au/info/thermal_stress/#atapproximation
 export function feelsLike(tempC: number, windMs: number, humidityPct: number): number {
@@ -102,7 +102,7 @@ export function formatTimeZoned(iso: string, timeZone: string = DISPLAY_TZ): str
   });
 }
 
-// Hour-only time — used for row titles where the entry is always on the hour and SMHI shows
+// Hour-only time, used for row titles where the entry is always on the hour and SMHI shows
 // just "16" rather than "16:00".
 export function formatHour(iso: string, timeZone: string = DISPLAY_TZ): string {
   return new Date(iso).toLocaleTimeString(NUMBER_LOCALE, { hour: "2-digit", timeZone });
@@ -155,7 +155,7 @@ export function bucketByDay(entries: SmhiTimeEntry[], timeZone: string = DISPLAY
 
 export interface DailySummary {
   date: string; // YYYY-MM-DD in display tz
-  representativeTime: string; // ISO of the entry used for the symbol — picks closest to local noon
+  representativeTime: string; // ISO of the entry used for the symbol; picks closest to local noon
   minTemp: number;
   maxTemp: number;
   symbolCode: number;
@@ -208,7 +208,7 @@ export function isSameLocalDay(isoA: string, isoB: string, timeZone: string = DI
 const HOUR_MS = 60 * 60 * 1000;
 
 // Start of the wall-clock hour containing `at`. The forecast is hourly, so this is the earliest
-// entry still worth showing — a cached payload can otherwise surface an hour that has passed.
+// entry still worth showing, since a cached payload can otherwise surface an hour that has passed.
 export function hourStart(at: Date = new Date()): number {
   return Math.floor(at.getTime() / HOUR_MS) * HOUR_MS;
 }
