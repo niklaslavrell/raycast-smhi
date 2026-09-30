@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, Toast, showToast, Keyboard } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -21,6 +21,7 @@ import {
 } from "./format";
 import { dayMarkdown, warningMarkdown } from "./markdown";
 import { RenameFavoriteForm } from "./rename-favorite-form";
+import { SHORTCUTS } from "./shortcuts";
 import { SmhiError, valueOr, type SmhiTimeEntry, coordDistanceKm, fetchForecast } from "./smhi";
 import { locationTitle, makeLocation, useFavorites } from "./storage";
 import { precipTypeLabel, symbolFor } from "./symbols";
@@ -40,7 +41,7 @@ export function ForecastView({ lat, lon, label }: ForecastViewProps) {
   const [showingDetail, setShowingDetail] = useState(false);
   const toggleDetail = () => setShowingDetail((v) => !v);
 
-  // useCachedPromise has no native TTL — same key returns cached. Adding a 30-min
+  // useCachedPromise has no native TTL: the same key returns cached. Adding a 30-min
   // bucket to the key gives us a rolling cache window.
   const halfHourBucket = Math.floor(Date.now() / HALF_HOUR_MS);
 
@@ -78,7 +79,7 @@ export function ForecastView({ lat, lon, label }: ForecastViewProps) {
     { keepPreviousData: true },
   );
 
-  // `revalidate` is fire-and-forget, so the animated toast can't be awaited to completion — and an
+  // `revalidate` is fire-and-forget, so the animated toast can't be awaited to completion, and an
   // animated toast never dismisses itself. Hold on to it and resolve it when loading settles.
   const pendingRefresh = useRef<Toast | undefined>(undefined);
   const refresh = async () => {
@@ -216,27 +217,27 @@ function CommonActionItems({
       <Action
         title={showingDetail ? "Hide Details" : "Show Details"}
         icon={showingDetail ? Icon.EyeDisabled : Icon.Eye}
-        shortcut={{ modifiers: ["cmd"], key: "d" }}
+        shortcut={SHORTCUTS.toggleDetail}
         onAction={toggleDetail}
       />
       <Action
         title={pinned ? "Remove from Favorites" : "Add to Favorites"}
         icon={pinned ? Icon.StarDisabled : Icon.Star}
-        shortcut={{ modifiers: ["cmd"], key: "f" }}
+        shortcut={SHORTCUTS.toggleFavorite}
         onAction={togglePin}
       />
       {pinned && (
         <Action.Push
           title="Rename Favorite"
           icon={Icon.Pencil}
-          shortcut={{ modifiers: ["cmd"], key: "e" }}
+          shortcut={Keyboard.Shortcut.Common.Edit}
           target={<RenameFavoriteForm location={location} onSubmit={renameFavorite} />}
         />
       )}
       <Action
         title="Refresh"
         icon={Icon.ArrowClockwise}
-        shortcut={{ modifiers: ["cmd"], key: "r" }}
+        shortcut={Keyboard.Shortcut.Common.Refresh}
         onAction={refresh}
       />
     </ActionPanel.Section>
@@ -244,7 +245,7 @@ function CommonActionItems({
 }
 
 // SMHI-style precipitation accessories. The probability is shown as a colored pill (blue when
-// ≥50%, otherwise neutral gray); the amount is the ensemble's min – max range alongside it.
+// ≥50%, otherwise neutral gray); the amount is the ensemble's min to max range alongside it.
 function precipAccessories(minMm: number, maxMm: number, probability: number): List.Item.Accessory[] {
   if (maxMm < 0.05 && probability < 5) return [];
   const accessories: List.Item.Accessory[] = [
@@ -259,7 +260,7 @@ function precipAccessories(minMm: number, maxMm: number, probability: number): L
   return accessories;
 }
 
-// Raycast tags use a single color for both text and a tinted background — they don't expose the
+// Raycast tags use a single color for both text and a tinted background, so they can't express the
 // SMHI design's "saturated bg + neutral text" pair. The closest match is to pick colors that
 // already read near-black in light mode (and near-white in dark mode); the auto-faded background
 // still conveys the blue/gray distinction.
@@ -286,7 +287,7 @@ function tempAccessory(c: number, tooltip: string): List.Item.Accessory {
   return { text: { value: formatTemp(c), color: tempColor(c) }, tooltip };
 }
 
-// Air temperature with the apparent temperature in parentheses — the same "value (secondary)"
+// Air temperature with the apparent temperature in parentheses, the same "value (secondary)"
 // shape the wind accessory already uses for its gust, so the row teaches the convention once.
 // Spelling out "feels" on all 24 rows made the widest element of the row its most repetitive one.
 // The pair is colored by whichever of the two lands in a signal band, preferring the air
@@ -311,7 +312,7 @@ function ForecastItem({ entry, common }: { entry: SmhiTimeEntry; common: CommonA
   const feels = feelsLike(d.air_temperature, d.wind_speed, d.relative_humidity);
 
   // With the detail pane open the list column is too narrow for the wind and precipitation
-  // columns — the two temperatures stay, the pane carries the rest.
+  // columns, so the two temperatures stay and the pane carries the rest.
   const accessories: List.Item.Accessory[] = common.showingDetail
     ? [tempPairAccessory(d.air_temperature, feels)]
     : [

@@ -1,9 +1,10 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Keyboard } from "@raycast/api";
 import { useCachedPromise, useFrecencySorting } from "@raycast/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ForecastView } from "./forecast-view";
 import { geocode, type GeocodeResult } from "./nominatim";
 import { RenameFavoriteForm } from "./rename-favorite-form";
+import { SHORTCUTS } from "./shortcuts";
 import { locationId, locationTitle, makeLocation, useFavorites, useRecents, type SavedLocation } from "./storage";
 
 const DEBOUNCE_MS = 300;
@@ -171,14 +172,14 @@ function SavedLocationItem({
           <Action
             title={pinned ? "Remove from Favorites" : "Add to Favorites"}
             icon={pinned ? Icon.StarDisabled : Icon.Star}
-            shortcut={{ modifiers: ["cmd"], key: "f" }}
+            shortcut={SHORTCUTS.toggleFavorite}
             onAction={() => (pinned ? removeFavorite(location.id) : addFavorite(location))}
           />
           {pinned && (
             <Action.Push
               title="Rename Favorite"
               icon={Icon.Pencil}
-              shortcut={{ modifiers: ["cmd"], key: "e" }}
+              shortcut={Keyboard.Shortcut.Common.Edit}
               target={<RenameFavoriteForm location={location} onSubmit={renameFavorite} />}
             />
           )}
@@ -186,7 +187,7 @@ function SavedLocationItem({
             <Action
               title="Move Up"
               icon={Icon.ArrowUp}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+              shortcut={Keyboard.Shortcut.Common.MoveUp}
               onAction={reorder.moveUp}
             />
           )}
@@ -194,7 +195,7 @@ function SavedLocationItem({
             <Action
               title="Move Down"
               icon={Icon.ArrowDown}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+              shortcut={Keyboard.Shortcut.Common.MoveDown}
               onAction={reorder.moveDown}
             />
           )}
@@ -202,7 +203,7 @@ function SavedLocationItem({
             <Action
               title="Reset Ranking"
               icon={Icon.ArrowCounterClockwise}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
+              shortcut={SHORTCUTS.resetRanking}
               onAction={onResetRanking}
             />
           )}
@@ -211,7 +212,7 @@ function SavedLocationItem({
               title="Remove from Recents"
               icon={Icon.Trash}
               style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["ctrl"], key: "x" }}
+              shortcut={Keyboard.Shortcut.Common.Remove}
               onAction={onForget}
             />
           )}
@@ -221,8 +222,8 @@ function SavedLocationItem({
   );
 }
 
-// Nominatim's display name leads with the place name, so the row read "Stockholm — Stockholm,
-// Stockholms kommun, …". Drop the repeated prefix and keep the part that adds information.
+// Nominatim's display name leads with the place name, so the row read "Stockholm" above
+// "Stockholm, Stockholms kommun, …". Drop the repeated prefix and keep the part that adds information.
 function resultSubtitle(label: string, displayName: string): string | undefined {
   switch (true) {
     case displayName === label:
@@ -261,7 +262,7 @@ function SearchResultItem({
           <Action
             title={pinned ? "Remove from Favorites" : "Add to Favorites"}
             icon={pinned ? Icon.StarDisabled : Icon.Star}
-            shortcut={{ modifiers: ["cmd"], key: "f" }}
+            shortcut={SHORTCUTS.toggleFavorite}
             onAction={() => (pinned ? removeFavorite(location.id) : addFavorite(location))}
           />
         </ActionPanel>
