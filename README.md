@@ -1,4 +1,4 @@
-# SMHI
+# SMHI Weather
 
 Raycast weather forecasts from [SMHI](https://www.smhi.se/) − no API key required.
 
@@ -23,5 +23,6 @@ Raycast weather forecasts from [SMHI](https://www.smhi.se/) − no API key requi
 
 ## Attribution
 
+- Unofficial. Not affiliated with or endorsed by SMHI.
 - Weather data © [SMHI](https://www.smhi.se/) under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 - Geocoding © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright) via Nominatim, ODbL 1.0.
