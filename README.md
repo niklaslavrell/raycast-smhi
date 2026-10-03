@@ -18,7 +18,7 @@ Raycast weather forecasts from [SMHI](https://www.smhi.se/) − no API key requi
 - Hourly rows read `15° (13°)`: air temperature, then what it feels like. The pair turns blue when either value drops below freezing, so wind chill is visible at a glance.
 - ⌘D toggles the detail pane. Hourly rows show a metadata breakdown; coming days show an hour-by-hour interval table.
 - Pin a forecast as a favorite with ⌘F. Rename it with ⌘E (give it "Home", "Work", "Cabin", …). Reorder with ⌘⇧↑/↓.
-- Recent searches appear under Favorites, sorted by how often + how recently you've visited them. ⌘⇧⌫ resets a ranking, ⌃X forgets the place.
+- Recent searches appear under Favorites, sorted by how often + how recently you've visited them. ⌘⇧⌫ resets a ranking, ⌃D forgets the place.
 - ⌘R refreshes the current forecast on demand.
 
 ## Attribution
