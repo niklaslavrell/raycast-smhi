@@ -10,8 +10,7 @@
     "Web"
   ],
   "platforms": [
-    "macOS",
-    "Windows"
+    "macOS"
   ],
   "license": "MIT",
   "commands": [

@@ -1,8 +1,10 @@
 import { Keyboard } from "@raycast/api";
 
-// The extension ships for macOS and Windows, so a bare `cmd` binding is ambiguous: Raycast can't
-// know what the Windows equivalent should be. Most of the actions here use Keyboard.Shortcut.Common,
-// which already carries both platforms; these three have no Common equivalent and spell it out.
+// Shortcuts are declared per platform even though the manifest currently ships macOS only, so
+// adding Windows back is a one-line change rather than an audit of every Action. A bare `cmd`
+// binding is ambiguous there, and Raycast has no way to guess the equivalent. Most actions use
+// Keyboard.Shortcut.Common, which already carries both platforms; these three have no Common
+// equivalent and spell it out.
 //
 // Not `as const satisfies`: Keyboard.Shortcut wants a mutable KeyModifier[], which a readonly
 // tuple doesn't satisfy. Plain `satisfies` still contextually types the modifiers.
