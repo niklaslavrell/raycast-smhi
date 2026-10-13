@@ -22,12 +22,11 @@ import {
 import { dayMarkdown, warningMarkdown } from "./markdown";
 import { RenameFavoriteForm } from "./rename-favorite-form";
 import { SHORTCUTS } from "./shortcuts";
-import { SmhiError, valueOr, type SmhiTimeEntry, coordDistanceKm, fetchForecast } from "./smhi";
+import { SmhiError, valueOr, type SmhiTimeEntry, coordDistanceKm, forgetForecast, loadForecast } from "./smhi";
 import { locationTitle, makeLocation, useFavorites } from "./storage";
 import { precipTypeLabel, symbolFor } from "./symbols";
-import { fetchWarnings, levelPresentation, warningsAt, type ResolvedWarning } from "./warnings";
+import { forgetWarnings, levelPresentation, loadWarnings, warningsAt, type ResolvedWarning } from "./warnings";
 
-const HALF_HOUR_MS = 30 * 60 * 1000;
 const COVERAGE_KM = 50;
 const WARNINGS_URL = "https://www.smhi.se/vader/varningar-och-brandrisk/varningar-och-meddelanden";
 
@@ -41,22 +40,15 @@ export function ForecastView({ lat, lon, label }: ForecastViewProps) {
   const [showingDetail, setShowingDetail] = useState(false);
   const toggleDetail = () => setShowingDetail((v) => !v);
 
-  // useCachedPromise has no native TTL: the same key returns cached. Adding a 30-min
-  // bucket to the key gives us a rolling cache window.
-  const halfHourBucket = Math.floor(Date.now() / HALF_HOUR_MS);
-
   const {
     data,
     isLoading,
     error,
     revalidate: revalidateForecast,
   } = useCachedPromise(
-    // The `bucket` arg is referenced only so the cache key flips every 30 minutes.
-    async (lat: number, lon: number, bucket: number) => {
-      void bucket;
-      return fetchForecast(lon, lat);
-    },
-    [lat, lon, halfHourBucket],
+    // `loadForecast` holds the 30-minute TTL; useCachedPromise only paints the last result while it runs.
+    async (lat: number, lon: number) => loadForecast(lon, lat),
+    [lat, lon],
     {
       keepPreviousData: true,
       onError: (err) => {
@@ -70,20 +62,17 @@ export function ForecastView({ lat, lon, label }: ForecastViewProps) {
     },
   );
 
-  const { data: warningEvents, revalidate: revalidateWarnings } = useCachedPromise(
-    async (bucket: number) => {
-      void bucket;
-      return fetchWarnings();
-    },
-    [halfHourBucket],
-    { keepPreviousData: true },
-  );
+  const { data: warningEvents, revalidate: revalidateWarnings } = useCachedPromise(async () => loadWarnings(), [], {
+    keepPreviousData: true,
+  });
 
   // `revalidate` is fire-and-forget, so the animated toast can't be awaited to completion, and an
   // animated toast never dismisses itself. Hold on to it and resolve it when loading settles.
   const pendingRefresh = useRef<Toast | undefined>(undefined);
   const refresh = async () => {
     pendingRefresh.current = await showToast({ style: Toast.Style.Animated, title: "Refreshing…" });
+    forgetForecast(lon, lat);
+    forgetWarnings();
     revalidateForecast();
     revalidateWarnings();
   };
@@ -100,7 +89,7 @@ export function ForecastView({ lat, lon, label }: ForecastViewProps) {
     toast.title = "Forecast updated";
   }, [isLoading, error]);
 
-  const fromMs = useMemo(() => hourStart(), [halfHourBucket]);
+  const fromMs = hourStart();
   const view = useMemo(() => (data ? splitForecast(data.timeSeries, fromMs) : null), [data, fromMs]);
   const warnings = useMemo(() => (warningEvents ? warningsAt(lat, lon, warningEvents) : []), [warningEvents, lat, lon]);
   const snappedFar = data && coordDistanceKm([lon, lat], data.geometry.coordinates) > COVERAGE_KM;

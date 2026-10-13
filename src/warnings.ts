@@ -2,8 +2,8 @@
 // API: https://opendata-download-warnings.smhi.se/ibww/api/version/1/warning.json
 // Each warning event has one or more warningAreas; each area carries a GeoJSON polygon
 // in EPSG:4326 so we can filter to a point client-side.
-
 import { Color, Icon } from "@raycast/api";
+import { createTtlCache } from "./ttl-cache";
 
 export type WarningLevelCode = "MESSAGE" | "YELLOW" | "ORANGE" | "RED";
 
@@ -61,8 +61,20 @@ export interface ResolvedWarning {
 }
 
 const WARNINGS_URL = "https://opendata-download-warnings.smhi.se/ibww/api/version/1/warning.json";
+const WARNINGS_TTL_MS = 30 * 60 * 1000;
+// One feed covers the whole country, so a single key is enough.
+const WARNINGS_KEY = "all";
+const warningsCache = createTtlCache<WarningEventRaw[]>({ namespace: "warnings", ttlMs: WARNINGS_TTL_MS });
 
-export async function fetchWarnings(signal?: AbortSignal): Promise<WarningEventRaw[]> {
+export async function loadWarnings(signal?: AbortSignal): Promise<WarningEventRaw[]> {
+  return warningsCache.getOrLoad(WARNINGS_KEY, () => fetchWarnings(signal));
+}
+
+export function forgetWarnings(): void {
+  warningsCache.forget(WARNINGS_KEY);
+}
+
+async function fetchWarnings(signal?: AbortSignal): Promise<WarningEventRaw[]> {
   const res = await fetch(WARNINGS_URL, { signal });
   if (!res.ok) throw new Error(`SMHI warnings ${res.status}`);
   return (await res.json()) as WarningEventRaw[];
