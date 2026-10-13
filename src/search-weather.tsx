@@ -1,13 +1,15 @@
 import { Action, ActionPanel, Icon, List, Keyboard } from "@raycast/api";
 import { useCachedPromise, useFrecencySorting } from "@raycast/utils";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ForecastView } from "./forecast-view";
 import { geocode, type GeocodeResult } from "./nominatim";
 import { RenameFavoriteForm } from "./rename-favorite-form";
 import { SHORTCUTS } from "./shortcuts";
 import { locationId, locationTitle, makeLocation, useFavorites, useRecents, type SavedLocation } from "./storage";
 
-const DEBOUNCE_MS = 300;
+// Nominatim allows at most one request per second and no search-as-you-type, so wait until the
+// user has paused for about that long.
+const DEBOUNCE_MS = 1000;
 const MIN_QUERY_LENGTH = 3;
 const RECENTS_VISIBLE = 8;
 
@@ -21,13 +23,14 @@ export default function SearchWeather() {
   }, [text]);
 
   const showSearchResults = debounced.length >= MIN_QUERY_LENGTH;
+  const abortable = useRef<AbortController>(null);
   const { data: results, isLoading } = useCachedPromise(
-    async (q: string) => {
-      if (q.length < MIN_QUERY_LENGTH) return [];
-      return geocode(q);
+    async (query: string) => {
+      if (query.length < MIN_QUERY_LENGTH) return [];
+      return geocode(query, abortable.current?.signal);
     },
     [debounced],
-    { keepPreviousData: true },
+    { keepPreviousData: true, abortable },
   );
 
   const { favorites, addFavorite, removeFavorite, moveFavorite, renameFavorite } = useFavorites();
