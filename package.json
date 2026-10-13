@@ -6,8 +6,7 @@
   "icon": "extension-icon.png",
   "author": "niklaslavrell",
   "categories": [
-    "Productivity",
-    "Web"
+    "Productivity"
   ],
   "platforms": [
     "macOS"
@@ -20,9 +19,7 @@
       "description": "Search SMHI weather forecasts by place name",
       "mode": "view",
       "keywords": [
-        "weather",
         "forecast",
-        "smhi",
         "vader",
         "väder",
         "nordic",
