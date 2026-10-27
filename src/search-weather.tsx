@@ -170,7 +170,7 @@ function SavedLocationItem({
             title="Show Forecast"
             icon={Icon.Cloud}
             onPush={() => onVisit(location)}
-            target={<ForecastView lat={location.lat} lon={location.lon} label={title} />}
+            target={<ForecastView lat={location.lat} lon={location.lon} label={location.label} />}
           />
           <Action
             title={pinned ? "Remove from Favorites" : "Add to Favorites"}
